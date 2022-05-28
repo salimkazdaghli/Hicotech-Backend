@@ -1,52 +1,46 @@
 const request = require("supertest");
 const { createServer } = require("../utils/serverUtils");
 const mongoose = require("mongoose");
-const connectDB = require("../config/db");
 const app = createServer();
 const { MongoMemoryServer } = require("mongodb-memory-server");
 
 describe("Event", () => {
-    jest.setTimeout(10000);
-    beforeAll(async () => {
-      const mongoServer = await MongoMemoryServer.create();
-      await mongoose.connect(mongoServer.getUri());
+  jest.setTimeout(10000);
+  beforeAll(async () => {
+    const mongoServer = await MongoMemoryServer.create();
+    await mongoose.connect(mongoServer.getUri());
+  }),
+    afterAll(async () => {
+      await mongoose.disconnect();
+      await mongoose.connection.close();
     }),
-      afterAll(async () => {
-        await mongoose.disconnect();
-        await mongoose.connection.close();
-      }),
-      test("should not add a event empty", async () => {
-        const data = {
-         
-        };
-        await request(app)
-        .post("/api/events")
-        .send(data)
-        .expect(400)
-        .then(async (response) => {
-            expect(response.body.message).toBe("Event content can not be empty");
+    test("should get all events (empty events) ", async () => {
+      await request(app)
+        .get("/api/events")
+        .expect(200)
+        .then((res) => {
+          expect(Array.isArray(res.body)).toBeTruthy();
+          expect(res.body.length).toEqual(0);
         });
-    
-  });
-
-  test("should get all events (empty events) ", async () => {
+    });
+  test("should not add a event empty", async () => {
+    const data = {
+     
+    };
     await request(app)
-      .get("/api/events")
-      .expect(200)
-      .then((res) => {
-        expect(Array.isArray(res.body)).toBeTruthy();
-        expect(res.body.length).toEqual(0);
+      .post("/api/events")
+      .send(data)
+      .expect(400)
+      .then(async (response) => {
+        expect(response.body.message).toBe("Event content can not be empty");
       });
   });
-
   test("should add a event", async () => {
     const data = {
       title: "event test",
       description: "event test",
       image : "",
       etat:"Pour Tous",
-      participants:"6227c9b0937d2b88dee08403",
-      dateEvent :"2022-05-28T22:56:48.223Z"
      
     };
     await request(app)
@@ -59,13 +53,14 @@ describe("Event", () => {
         expect(response.body.description).toBe(data.description);
         expect(response.body.image).toBe(data.image);
         expect(response.body.etat).toBe(data.etat);
+   
         savedEvent = response.body;
       });
   });
 
   test("should get all events", () => {
     request(app)
-    .post("/api/events")
+      .get("/api/events")
       .expect(200)
       .then((res) => {
         expect(Array.isArray(res.body)).toBeTruthy();
@@ -76,7 +71,17 @@ describe("Event", () => {
       });
   });
 
-  
+  test("should return a single event", async function () {
+    await request(app)
+      .get("/api/events/" + savedEvent._id)
+      .expect(200)
+      .then((res) => {
+        expect(res.body._id).toBe(savedEvent._id);
+        expect(res.body.title).toBe(savedEvent.title);
+        expect(res.body.description).toBe(savedEvent.description);
+      });
+      
+  });
 
   test("should not update a event empty", async () => {
     const data = {
@@ -95,10 +100,13 @@ describe("Event", () => {
     const data = {
       title: "event put test",
       description: "event put  test",
+      etat:"Mes Joueurs",
+     
     };
     await request(app)
       .put("/api/events/" + savedEvent._id)
       .send(data)
+      .expect(200)
       .then((res) => {
         expect(res.body._id).toBe(savedEvent._id);
         expect(res.body.title).toBe(data.title);
@@ -115,6 +123,7 @@ describe("Event", () => {
       })
   });
 
+  
 
   test("should return 404 when the id doesn't exist",async function(){
     await request(app)
@@ -138,6 +147,8 @@ describe("Event", () => {
     const data = {
       title: "event put test",
       description: "event put  test",
+      etat:"Mes Joueurs",
+  
     };
       await request(app)
         .put("/api/events/"+savedEvent._id)
@@ -147,7 +158,5 @@ describe("Event", () => {
           expect(response.body.message).toBe("Event not found with id "+savedEvent._id)
       })
     })
-  
-
 
 });
