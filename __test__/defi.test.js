@@ -98,7 +98,6 @@ describe("Defi", () => {
     const data = {
       defiName: "defi put test",
       defiObjectif: "defi put  test",
-     
       defiLien : "http://127.0.0.1:5000/hicotech"
     };
     await request(app)
@@ -155,9 +154,6 @@ describe("Defi", () => {
         .then((response)=>{
           expect(response.body.message).toBe("Defi not found with id "+savedDefi._id)
       })
-    })
-  
-    
-
+    })  
 
 });

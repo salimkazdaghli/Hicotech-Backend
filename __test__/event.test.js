@@ -36,6 +36,7 @@ describe("Event", () => {
       });
   });
   test("should add a event", async () => {
+  
     const data = {
       title: "event test",
       description: "event test",
