@@ -35,21 +35,6 @@ describe("Seance", () => {
         expect(response.body.message).toBe("Seance content can not be empty");
       });
   });
-//   test("should add a seance", async () => {
-//     const data = {
-//     seanceName: "seance test"
-    
-//     };
-//     await request(app)
-//       .post("/api/seances")
-//       .send(data)
-//       .expect(200)
-//       .then(async (response) => {
-//         expect(response.body).toBeTruthy();
-//         expect(response.body.seanceName).toBe(data.seanceName);
-//         savedSeance = response.body;
-//       });
-//   });
 
   test("should get all seances", () => {
     request(app)
@@ -63,5 +48,4 @@ describe("Seance", () => {
         expect(res.body[0].description).toBe(savedSeance.description);
       });
   });
-
 });
